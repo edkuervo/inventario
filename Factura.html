@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<title>Factura Tres Almas</title>
+		<style>
+			html {
+				font-size: 13px;
+			}
+			body {
+				font-family: arial, sans-serif;
+				background-color: #677ab5;
+				padding: 0;
+				margin: 0;
+			}
+			h1 {
+				font-size: 1.5rem;
+				text-align: center;
+			}
+			p {
+				margin: 5px 0;
+			}
+			.gracias {
+				font-weight: 600;
+				font-size: 1.1rem;
+				text-align: center;
+				margin: 20px 0 0;
+				display: none;
+			}
+			/* +++++++++  Header  ++++++++++ */
+			header {
+				background-color: #fff;
+				margin-bottom: 20px;
+				padding: 20px;
+				text-align: center;
+				border-bottom: 3px solid #41bfa0;
+				box-shadow: 0 0 11px 1px #333;
+			}
+			
+			/* +++++++++  Contenedor  ++++++++++ */
+			.contenedor {
+				max-width: 285px;
+				margin: 0 auto;
+				padding: 30px 20px;
+				background-color: #fff;
+				box-shadow: 0 0 11px 1px #333;
+			}
+			
+			.center { text-align: center; }
+			.gris { color: #ddd; }
+			.a-der { text-align: right; }
+			.show_print { display: none; }
+			
+			.fact, .fecha {
+				border: 1px solid #fff;
+				margin: 0;
+				padding: 0;
+			}
+			.tabla {
+				display: table;
+				width: 100%;
+				font-size: 0.9rem;
+				margin-top: 30px;
+			}
+				.tabla > div {
+					display: table-row;
+					display: none;
+				}
+				.tabla > div.fila, .tabla > div.prod1, .tabla > div.visible {display: table-row;}
+					.celda, .tabla > div > div {
+						display: table-cell;
+						padding: 3px;
+						position: relative;
+						vertical-align: top;
+					}
+					.w1 {
+						width: 63%;
+					}
+					.w2 {
+						width: 10%;
+					}
+					.tabla input {
+						width: 100%;
+						border: 1px solid #ccc;
+						padding: 5px;
+						font-size: 0.9rem;
+						box-sizing: border-box;
+					}
+					.tabla textarea {
+						width: 100%;
+						resize: none;
+						border: 1px solid #ccc;
+						height: 25px;
+						max-height: 100px;
+						overflow: hidden;
+						padding: 5px;
+						box-sizing: border-box;
+						font-family: arial, sans-serif;
+					}
+					.input_total {
+						width: 30%;
+						border: 1px solid #ccc;
+						padding: 5px;
+						box-sizing: border-box;
+					}
+					
+			.cant-p {width: 40px;}
+			.btn {
+				display: inline-block;
+				margin: 4px;
+				padding: 5px 10px;
+				font-size: 1.1rem;
+
+			}
+			.btn:hover{ cursor: pointer; }
+				.btn_plus { color: green; background-color: #c5f3c5; border: 1px solid green; }
+				.btn_minus { 
+					color: #fff;
+					background-color: red;
+					border: 3px solid #fff;
+					border-radius: 50%;
+					width: 25px;
+					height: 25px;
+					padding: 0;
+					position: absolute;
+					line-height: 15px;
+					text-align: center;
+					top: -1px;
+					font-size: 1.2rem;
+					font-weight: 700;
+					right: -31px;
+				}
+				
+			.total {
+				border-top: 1px solid #aaa;
+				margin-top: 20px;
+				padding-top: 20px;
+				font-size: 0.9rem;
+			}
+			.btn_print {
+				text-align: center;
+			}
+				.btn_print button, header button {
+					color: #41bfa0;
+					border: 1px solid #41bfa0;
+					border-radius: 5px;
+					font-size: 1.3rem;
+				}
+				
+				
+			/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+			@media print {
+				.gracias {
+					display: block;
+				}
+				.contenedor {
+					padding: 0; 
+					max-width: none; 
+					margin: 0;
+					box-shadow: none;
+				}
+				.tabla input, .input_total, .tabla textarea {
+					border: 0px solid #fff;
+					padding: 0;
+					
+				}
+				
+				.div-cant-p {display: none;}
+				.hide_print {display: none;}
+				.show_print {display: block;}
+			}
+			
+		</style>
+		
+		<script type="text/javascript">
+			function sumar(){
+				var filas = document.getElementsByClassName("cant-p")[0].value;
+				var suma = 0;
+				var i;
+				var dato;
+				for (i=1; i <= parseInt(filas,10); i++){
+					dato = document.getElementById('total' + i).value.replace(/\./g,'');
+					suma = suma + parseInt(dato, 10);
+				}
+				
+				document.getElementById('totalisimo').value = Number(suma).toLocaleString();
+				
+			}
+			function format(input){
+				var num = input.value;
+				num = String(num).replace(/\D/g,'');
+				num = Number(num).toLocaleString();
+				input.value = num;
+				sumar();
+			}
+			
+			function otro() {
+				var filas = document.getElementsByClassName("cant-p")[0].value;
+				if( parseInt(filas,10) < 20) {
+					filas = parseInt(filas,10) + 1;
+					document.getElementsByClassName("cant-p")[0].value = filas;
+					var filaName = 'prod' + filas;
+					document.getElementById(filaName).classList.add('visible');
+					var descName = 'desc' + filas;
+					document.getElementById(descName).focus();
+				}
+			}
+			
+			function borrar(boton) {
+				var filas = parseInt(document.getElementsByClassName("cant-p")[0].value, 10);
+				var num = parseInt(boton.value, 10);
+				var sig;
+				
+				
+				if (filas < 20) {
+					do {
+						sig = num + 1;
+						document.getElementById('desc' + num).value = document.getElementById('desc' + sig).value;
+						document.getElementById('cant' + num).value = document.getElementById('cant' + sig).value;
+						document.getElementById('total' + num).value = document.getElementById('total' + sig).value;
+						num = sig;
+					}
+					while (num < filas); 
+				}
+				document.getElementById('desc' + filas).value = '';
+				document.getElementById('cant' + filas).value = '';
+				document.getElementById('total' + filas).value = '';
+				document.getElementById('prod' + filas).classList.remove('visible');
+				filas = parseInt(filas,10) - 1;
+				document.getElementsByClassName("cant-p")[0].value = filas;
+				sumar();
+			}
+			
+			function autogrow(texto) {
+				texto.style.height = "13px";
+				texto.style.height = (texto.scrollHeight) + "px";
+			}
+			
+			function numero_fac(){
+				// codigo para el autonumérico
+				document.getElementById('fact').value = localStorage.fact;
+			}
+			function autoFact(fact) {
+				var numero = parseInt(document.getElementById('fact').value, 10);
+				numero = numero + 1;
+				localStorage.fact = numero;
+			}
+			
+			function mueveReloj(){
+				d = new Date();
+				var m = d.getMonth() + 1;
+				var mes = (m < 10) ? '0' + m : m;
+				var hora = d.getHours();
+				var minuto = d.getMinutes();
+				var segundo = d.getSeconds();
+				str_segundo = new String (segundo);
+				if (str_segundo.length == 1)
+					segundo = '0' + segundo;
+				str_minuto = new String (minuto);
+				if (str_minuto.length == 1)
+					minuto = '0' + minuto;
+				str_hora = new String (hora);
+				if (str_hora.length == 1)
+					hora = '0' + hora;
+				document.getElementById('fecha').value = d.getDate() + '/' + mes + '/' + d.getFullYear() + ' ' + hora + ':' + minuto + ':' + segundo;
+				
+				setTimeout("mueveReloj()", 1000);
+			}
+			
+			
+		</script>
+		
+	</head>
+	<body onload="numero_fac(); mueveReloj()">
+		<header class="hide_print">
+			<button class="btn" onclick="autoFact(); location.reload()" >Finalizar y nueva factura</button>
+		</header>
+		<div class="contenedor">
+			<h1>TRES ALMAS</h1>
+			<p>No: <input type="text" id="fact" value="" class="fact"/></p>
+			<p>
+				<strong>Fecha: </strong>
+				<input type="text" readonly="true" id="fecha" class="fecha"/>
+			</p>
+			<p class="show_print"><strong>Nit: </strong>39 456 959</p>
+			<p class="show_print"><strong>Dirección: </strong>Complex Llanogrande, local 65, Rionegro</p>
+			<p class="show_print"><strong>Teléfono: </strong>304 218 2838</p>
+			<p class="show_print">@tresalmasco</p>
+			
+			<div class="a-der div-cant-p">Productos: <input type="number" value="1" class="cant-p a-der" readonly="true"/></div>
+			<div class="tabla">
+				<div class="fila">
+					<div class="celda w1">
+						DESCRIPCIÓN
+					</div>
+					<div class="celda w2 a-der">
+						CANT
+					</div>
+					<div class="celda a-der">
+						TOTAL
+					</div>
+				</div>
+				<div class="prod1">
+					<div><textarea name="desc1" id="desc1" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant1"  id="cant1" class="center" min="1"/></div>
+					<div><input type="text"   name="total1" id="total1" class="a-der" onkeyup="format(this)" /></div>
+				</div>
+				<div id="prod2">
+					<div><textarea name="desc2" id="desc2" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant2"  id="cant2" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total2" id="total2" class="a-der" onkeyup="format(this)" />
+						<button value="2" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod3">
+					<div><textarea name="desc3" id="desc3" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant3"  id="cant3" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total3" id="total3" class="a-der" onkeyup="format(this)" />
+						<button value="3" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod4">
+					<div><textarea name="desc4" id="desc4" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant4"  id="cant4" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total4" id="total4" class="a-der" onkeyup="format(this)" />
+						<button value="4" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod5">
+					<div><textarea name="desc5" id="desc5" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant5"  id="cant5" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total5" id="total5" class="a-der" onkeyup="format(this)" />
+						<button value="5" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod6">
+					<div><textarea name="desc6" id="desc6" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant6"  id="cant6" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total6" id="total6" class="a-der" onkeyup="format(this)" />
+						<button value="6" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod7">
+					<div><textarea name="desc7" id="desc7" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant7"  id="cant7" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total7" id="total7" class="a-der" onkeyup="format(this)" />
+						<button value="7" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod8">
+					<div><textarea name="desc8" id="desc8" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant8"  id="cant8" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total8" id="total8" class="a-der" onkeyup="format(this)" />
+						<button value="8" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod9">
+					<div><textarea name="desc9" id="desc9" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant9"  id="cant9" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total9" id="total9" class="a-der" onkeyup="format(this)" />
+						<button value="9" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod10">
+					<div><textarea name="desc10" id="desc10" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant10"  id="cant10" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total10" id="total10" class="a-der" onkeyup="format(this)" />
+						<button value="10" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod11">
+					<div><textarea name="desc11" id="desc11" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant11"  id="cant11" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total11" id="total11" class="a-der" onkeyup="format(this)" />
+						<button value="11" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod12">
+					<div><textarea name="desc12" id="desc12" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant12"  id="cant12" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total12" id="total12" class="a-der" onkeyup="format(this)" />
+						<button value="12" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod13">
+					<div><textarea name="desc13" id="desc13" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant13"  id="cant13" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total13" id="total13" class="a-der" onkeyup="format(this)" />
+						<button value="13" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod14">
+					<div><textarea name="desc14" id="desc14" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant14"  id="cant14" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total14" id="total14" class="a-der" onkeyup="format(this)" />
+						<button value="14" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod15">
+					<div><textarea name="desc15" id="desc15" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant15"  id="cant15" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total15" id="total15" class="a-der" onkeyup="format(this)" />
+						<button value="15" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod16">
+					<div><textarea name="desc16" id="desc16" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant16"  id="cant16" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total16" id="total16" class="a-der" onkeyup="format(this)" />
+						<button value="16" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod17">
+					<div><textarea name="desc17" id="desc17" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant17"  id="cant17" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total17" id="total17" class="a-der" onkeyup="format(this)" />
+						<button value="17" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod18">
+					<div><textarea name="desc18" id="desc18" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant18"  id="cant18" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total18" id="total18" class="a-der" onkeyup="format(this)" />
+						<button value="18" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod19">
+					<div><textarea name="desc19" id="desc19" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant19"  id="cant19" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total19" id="total19" class="a-der" onkeyup="format(this)" />
+						<button value="19" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+				<div id="prod20">
+					<div><textarea name="desc20" id="desc20" oninput="autogrow(this)"></textarea></div>
+					<div><input type="text"  name="cant20"  id="cant20" class="center" min="1"/></div>
+					<div>
+						<input type="text"   name="total20" id="total20" class="a-der" onkeyup="format(this)" />
+						<button value="20" onclick="borrar(this)" class="hide_print btn btn_minus">x</button>
+					</div>
+				</div>
+			</div>
+			<button onclick="otro()" class="btn btn_plus hide_print">+ Otro producto</button>
+			
+			<div class="total a-der">
+				TOTAL: <input type="text" name="totalisimo" id="totalisimo" class="input_total a-der" value="0" />
+			</div>
+			
+			<p class="gracias">
+				¡Gracias por tu compra!
+			</p>
+			<p class="center gris">_</p>
+			
+			<div class="btn_print hide_print">
+				<button class="btn" onclick="javascript:window.print()" >Imprimir</button>
+			</div>
+			
+		</div>
+	</body>
+</html>

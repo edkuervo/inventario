@@ -1,0 +1,3 @@
+- Crear la sección de informes
+- Crear el informe de ventas del mes
+- Crear el informe de movimientos de producto por proveedor y por mes

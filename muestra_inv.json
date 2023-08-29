@@ -1,0 +1,52 @@
+{
+	"proveedores":
+	[
+		{
+			"nombre":"",
+			"cod_prov":"",
+			"auto_prov":1,
+			"productos":
+			[
+				{
+					"codigo":"",
+					"desc":"",
+					"p_dist":0,
+					"p_venta":0,
+					"stock":0,
+					"modalidad":"1",
+					"movs":
+					[
+						{
+							"fecha":"",
+							"sale":0,
+							"entra":0,
+							"nota":""
+						}
+					]
+				}
+			]
+		}
+	],
+	"facturas":
+	[
+		{
+			"no_fac":"",
+			"fecha":"",
+			"totalFac":0,
+			"medio_pago":"",
+			"productos":
+			[
+				{
+					"producto":"codigo y descripcion del producto",
+					"cant":0,
+					"total":0
+				}
+			]
+		}
+	],
+	"autonum":730
+}
+
+
+
+
